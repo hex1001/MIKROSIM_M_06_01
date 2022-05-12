@@ -7,9 +7,9 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="1000">
     <Grid>
-        <Label x:Name="kgLabel"  Content="0.0" Margin="60,63,222,154" Width="710" Background="Black" Foreground="Red" FontSize="150"/>
-        <Button x:Name="btnOpen"  Content="Button" HorizontalAlignment="Left" Margin="835,165,0,0" VerticalAlignment="Top" Width="125" Height="62" Click="btnOpen_Click"/>
-        <Button x:Name="btnClose" Content="Button" HorizontalAlignment="Left" Margin="835,280,0,0" VerticalAlignment="Top" Width="125" Height="62" RenderTransformOrigin="0.48,2.532" Click="btnClose_Click"/>
+        <Label x:Name="kgLabel"  Content="0.0" Margin="10,100,182,51" Width="800" Background="Black" Foreground="Red" FontSize="200" HorizontalContentAlignment="Center" FontFamily="Verdana"/>
+        <Button x:Name="btnOpen"  Content="OPEN" HorizontalAlignment="Left" Margin="835,165,0,0" VerticalAlignment="Top" Width="125" Height="62" Click="btnOpen_Click"/>
+        <Button x:Name="btnClose" Content="CLOSE" HorizontalAlignment="Left" Margin="835,280,0,0" VerticalAlignment="Top" Width="125" Height="62" RenderTransformOrigin="0.48,2.532" Click="btnClose_Click"/>
         <ComboBox x:Name="serCombo" Margin="815,63,0,0" VerticalAlignment="Top" Width="120"/>
 
     </Grid>

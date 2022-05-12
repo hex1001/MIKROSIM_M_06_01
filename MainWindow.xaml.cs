@@ -4,7 +4,7 @@ using System.IO.Ports;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
+using EasyModbus;
 
 namespace MIKROSIM_M_06_01
 {
@@ -13,44 +13,65 @@ namespace MIKROSIM_M_06_01
     /// </summary>
     public partial class MainWindow : Window
     {
-        bool run = false;
-        SerialPort serial;
+        const int COUNT = 100000;
         string com;
-        string[] ports;
-        
+        volatile int count = 0;
+        SerialPort serial;
+        string[] myPort;
+        ModbusClient mb;
+        bool start = false;
+
         public MainWindow() {
             InitializeComponent();
-            ports = SerialPort.GetPortNames();
-            foreach (string p in ports)
-                serCombo.Items.Add(p);
+            myPort = SerialPort.GetPortNames();
+            foreach (string ss in myPort)                
+                serCombo.Items.Add(ss);
         }
 
         async public void Reading() {
             String[] str = new String[2];
-            float kg = 0;
             try {
                 com = serCombo.SelectedValue.ToString();
-                serial = new SerialPort(serCombo.SelectedValue.ToString(), 9600, Parity.None, 8, StopBits.One);
-                run = true;
-                while (run) {
-                    serial.Open();
-                    serial.Write(outCode, 0, outCode.Length);
-                    string ssss = serial.ReadLine().Trim();
-                    serial.Close();
+                serial = new SerialPort(com);
+                mb = new ModbusClient(com);
+                mb.UnitIdentifier = 1;
+                mb.Baudrate = 9600;
+                mb.Parity = System.IO.Ports.Parity.None;
+                mb.StopBits = System.IO.Ports.StopBits.One;
+                mb.ConnectionTimeout = 500;
+                mb.Connect();
+                start = true;
 
-                    kgLabel.Content = ssss;
-                    using (StreamWriter outputFile = new StreamWriter(Path.Combine(ssss, Directory.GetCurrentDirectory() + "\\natija.txt"))) {
-                        outputFile.WriteLine(ssss);
-                    }
-                    await Task.Delay(50);
-                }
+                //MessageBox.Show(com);
+
             } catch (Exception ex) {
-                serial.Close();
                 MessageBox.Show(ex.Message);
-                await Task.Delay(5000);
-                Reading();
             }
+            await Task.Delay(100);
+            while (start) {
+                if (count > COUNT) {
+                    mb.Disconnect();
+                    serial = new SerialPort(com);
+                    mb = new ModbusClient(com);
+                    mb.UnitIdentifier = 1;
+                    mb.Baudrate = 9600;
+                    mb.Parity = Parity.None;
+                    mb.StopBits = StopBits.One;
+                    mb.ConnectionTimeout = 500;
+                    mb.Connect();
+                    count = 0;
+                }
 
+                //string ssss = (mb.ReadHoldingRegisters(1, 4)[0] / 100.0).ToString();
+                string ssss = (mb.ReadHoldingRegisters(2,1)[0] / 100.0).ToString();
+                //MessageBox.Show(ssss);
+                kgLabel.Content = ssss;
+
+                await Task.Delay(100);
+                count++;
+            }
+            count = 0;
+            mb.Disconnect();
         }
 
         private void btnOpen_Click(object sender, RoutedEventArgs e) {
@@ -58,7 +79,7 @@ namespace MIKROSIM_M_06_01
                 return;
 
             btnOpen.IsEnabled = false;
-            run = true;
+            start = true;
             btnClose.IsEnabled = true;
             Reading();
         }
@@ -68,7 +89,7 @@ namespace MIKROSIM_M_06_01
                 serial.Close();
             btnOpen.IsEnabled = true;
             btnClose.IsEnabled = false;
-            run = false;
+            start = false;
         }
     }
 }
